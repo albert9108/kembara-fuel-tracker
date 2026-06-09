@@ -167,13 +167,19 @@ input[type=date] { color-scheme: dark; }
         </div>
         <div class="field">
           <label>Litres (L)</label>
-          <input type="number" id="f-litres" placeholder="e.g. 30.00" step="0.01">
+          <input type="number" id="f-litres" placeholder="e.g. 30.00" step="0.01" oninput="onLitresInput()">
         </div>
         <div class="field">
           <label>Amount paid (RM)</label>
-          <input type="number" id="f-amount" placeholder="e.g. 65.40" step="0.01">
+          <input type="number" id="f-amount" placeholder="e.g. 65.40" step="0.01" oninput="onAmountInput()">
         </div>
       </div>
+      <label class="madani-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;">
+        <input type="checkbox" id="f-madani" onchange="onMadaniChange()" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;">
+        <span style="font-size:12px;color:var(--text);font-weight:600;">Madani Budi RON95</span>
+        <span style="font-size:11px;color:var(--accent);font-weight:700;">RM 1.99/L</span>
+        <span id="madani-calc" style="font-size:10px;color:var(--muted);margin-left:auto;"></span>
+      </label>
       <div class="field" style="margin-bottom:10px;">
         <label>Notes (optional — station, fuel grade…)</label>
         <input type="text" id="f-notes" placeholder="e.g. RON95, Petron Putra Heights">
@@ -338,10 +344,52 @@ async function saveEntry() {
     await sheetAppend([[date, odo||'', litres, amount, kmDriven||'', notes]]);
     msg(`✓ Saved! ${kmDriven ? kmDriven+' km driven auto-calculated.' : 'No odometer — km/L not calculated.'}`, 'ok');
     ['f-odo','f-litres','f-amount','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-madani').checked = false;
+    document.getElementById('madani-calc').textContent = '';
     document.getElementById('f-date').value = today();
     await loadData();
   } catch(e) { msg('Save failed — try signing in again.','err'); console.error(e); }
   btn.disabled = false; btn.textContent = '+ Save Entry';
+}
+
+const MADANI_PRICE = 1.99;
+
+function onMadaniChange() {
+  const on = document.getElementById('f-madani').checked;
+  const litresEl = document.getElementById('f-litres');
+  const amountEl = document.getElementById('f-amount');
+  if (!on) { document.getElementById('madani-calc').textContent = ''; return; }
+  // Try to auto-fill whichever field is empty
+  const l = parseFloat(litresEl.value);
+  const a = parseFloat(amountEl.value);
+  if (a && !l) { litresEl.value = (a / MADANI_PRICE).toFixed(2); }
+  else if (l && !a) { amountEl.value = (l * MADANI_PRICE).toFixed(2); }
+  updateMadaniCalc();
+}
+
+function updateMadaniCalc() {
+  const on = document.getElementById('f-madani').checked;
+  const calc = document.getElementById('madani-calc');
+  if (!on) { calc.textContent = ''; return; }
+  const l = parseFloat(document.getElementById('f-litres').value);
+  const a = parseFloat(document.getElementById('f-amount').value);
+  if (l && a) calc.textContent = `${l.toFixed(1)}L × RM${MADANI_PRICE} = RM${(l*MADANI_PRICE).toFixed(2)}`;
+}
+
+function onLitresInput() {
+  const on = document.getElementById('f-madani').checked;
+  if (!on) return;
+  const l = parseFloat(document.getElementById('f-litres').value);
+  if (l) document.getElementById('f-amount').value = (l * MADANI_PRICE).toFixed(2);
+  updateMadaniCalc();
+}
+
+function onAmountInput() {
+  const on = document.getElementById('f-madani').checked;
+  if (!on) return;
+  const a = parseFloat(document.getElementById('f-amount').value);
+  if (a) document.getElementById('f-litres').value = (a / MADANI_PRICE).toFixed(2);
+  updateMadaniCalc();
 }
 
 function msg(t, cls) {

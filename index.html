@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kembara Fuel Tracker</title>
+<style>
+:root {
+  --bg: #0c0e13;
+  --surface: #13161e;
+  --surface2: #1a1e2a;
+  --border: #252836;
+  --accent: #f97316;
+  --accent-dim: #7c3a14;
+  --text: #e4e6ef;
+  --muted: #525870;
+  --good: #22c55e;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+  --blue: #3b82f6;
+  --r: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+/* HEADER */
+.hdr { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hdr-left { display: flex; align-items: center; gap: 10px; }
+.hdr-logo { font-size: 24px; line-height: 1; }
+.hdr-title { font-size: 15px; font-weight: 700; }
+.hdr-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* AUTH */
+.btn-google { display: flex; align-items: center; gap: 7px; background: white; color: #333; border: none; border-radius: 8px; padding: 7px 13px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-google:hover { background: #f0f0f0; }
+.auth-ok { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--good); }
+.auth-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex-shrink: 0; }
+
+/* TABS */
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; overflow-x: auto; }
+.tab { padding: 11px 13px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* CONTENT */
+.pane { padding: 14px 16px; max-width: 520px; display: none; }
+.pane.active { display: block; }
+
+/* CARD */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 12px; }
+.card-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+
+/* FORM */
+.fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; color: var(--muted); font-weight: 500; }
+.field input, .field select {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+  color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; width: 100%;
+}
+.field input:focus { border-color: var(--accent); }
+input[type=date] { color-scheme: dark; }
+
+.btn-save { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 4px; }
+.btn-save:hover { filter: brightness(1.1); }
+.btn-save:disabled { background: var(--border); color: var(--muted); cursor: default; filter: none; }
+
+.fmsg { font-size: 11px; text-align: center; margin-top: 7px; min-height: 16px; }
+.fmsg.ok { color: var(--good); } .fmsg.err { color: var(--bad); }
+
+/* TIP */
+.tip { border-left: 3px solid var(--accent); background: var(--surface2); border-radius: 0 6px 6px 0; padding: 9px 12px; font-size: 11px; color: var(--muted); line-height: 1.65; margin-bottom: 12px; }
+.tip b { color: var(--text); }
+.tip .odo-calc { background: var(--bg); border-radius: 5px; padding: 5px 8px; margin-top: 6px; font-size: 12px; color: var(--accent); font-weight: 600; }
+
+/* STATS */
+.sg { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.sbox { background: var(--bg); border-radius: 8px; padding: 11px 9px; text-align: center; }
+.sv { font-size: 18px; font-weight: 700; }
+.sl { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.ca { color: var(--accent); } .cg { color: var(--good); } .cw { color: var(--warn); } .cb { color: var(--bad); } .cm { color: var(--muted); }
+
+/* EFF BAR */
+.ebar-wrap { margin-top: 11px; }
+.ebar-top { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.ebar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.ebar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#ef4444 0%,#f59e0b 45%,#22c55e 100%); transition: width .4s; }
+
+/* PERIOD HERO */
+.phero { background: linear-gradient(135deg,#152040,var(--surface2)); border: 1px solid #2a3a5e; border-radius: var(--r); padding: 14px; margin-bottom: 12px; }
+.phero-title { font-size: 12px; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+
+/* ENTRIES */
+.entry { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.entry:last-child { border-bottom: none; }
+.entry-main { font-weight: 600; font-size: 13px; }
+.entry-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; flex-shrink: 0; }
+.badge-blue { background: #1e3a5f; color: #60a5fa; }
+.badge-dim { background: var(--border); color: var(--muted); }
+
+.empty { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0; }
+.ld { text-align: center; color: var(--muted); font-size: 12px; padding: 18px 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 5px; }
+
+/* SIGN-IN OVERLAY */
+.signin-banner { background: linear-gradient(135deg, #1a1e2a, #0c0e13); border: 1px solid var(--border); border-radius: var(--r); padding: 28px 20px; text-align: center; margin-bottom: 12px; }
+.signin-banner h2 { font-size: 16px; margin-bottom: 8px; }
+.signin-banner p { font-size: 12px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">⛽</div>
+    <div>
+      <div class="hdr-title">Kembara Fuel Log</div>
+      <div class="hdr-sub">Baseline 12 km/L · ODO start 304,323 km · 7 Jun 2025</div>
+    </div>
+  </div>
+  <div id="auth-zone">
+    <button class="btn-google" onclick="doSignIn()">
+      <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="sw('log')">Log Fuel</button>
+  <button class="tab" onclick="sw('week')">This Week</button>
+  <button class="tab" onclick="sw('month')">This Month</button>
+  <button class="tab" onclick="sw('history')">History</button>
+</div>
+
+<!-- LOG PANE -->
+<div id="pane-log" class="pane active">
+  <div id="signin-prompt" class="signin-banner">
+    <h2>Connect to Google Sheets</h2>
+    <p>Sign in with your Google account to save and load fuel entries from your spreadsheet. Data persists across devices and sessions.</p>
+    <button class="btn-google" style="margin:auto;justify-content:center;" onclick="doSignIn()">
+      <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+
+  <div id="log-form" style="display:none;">
+    <div class="tip">
+      <b>Recording your odometer is the key</b> — every time you pump, note the reading.<br>
+      KM driven is auto-calculated from your previous entry.<br>
+      <div class="odo-calc" id="odo-hint">Last known ODO: 304,323 km (start)</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">New Fill-Up</div>
+      <div class="fg2">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field">
+          <label>Odometer (km)</label>
+          <input type="number" id="f-odo" placeholder="e.g. 304680">
+        </div>
+        <div class="field">
+          <label>Litres (L)</label>
+          <input type="number" id="f-litres" placeholder="e.g. 30.00" step="0.01">
+        </div>
+        <div class="field">
+          <label>Amount paid (RM)</label>
+          <input type="number" id="f-amount" placeholder="e.g. 65.40" step="0.01">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Notes (optional — station, fuel grade…)</label>
+        <input type="text" id="f-notes" placeholder="e.g. RON95, Petron Putra Heights">
+      </div>
+      <button class="btn-save" id="btn-save" onclick="saveEntry()">+ Save Entry</button>
+      <div class="fmsg" id="fmsg"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">All-Time Summary</div>
+      <div id="alltime-body"><div class="ld"><span class="spin"></span>Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK PANE -->
+<div id="pane-week" class="pane">
+  <div id="week-body"><div class="ld"><span class="spin"></span>Loading…</div></div>
+</div>
+
+<!-- MONTH PANE -->
+<div id="pane-month" class="pane">
+  <div id="month-body"><div class="ld"><span class="spin"></span>Loading…</div></div>
+</div>
+
+<!-- HISTORY PANE -->
+<div id="pane-history" class="pane">
+  <div class="card">
+    <div class="card-lbl">All Entries</div>
+    <div id="history-body"><div class="empty">Sign in to load history.</div></div>
+  </div>
+</div>
+
+<!-- Google APIs -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+
+<script>
+// ── Config ─────────────────────────────────────────────
+const CLIENT_ID  = '463350410605-j2u4hv1h5jsasdc0kdec6kqggs0f8d4j.apps.googleusercontent.com';
+const SHEET_ID   = '1LXpFBoPsFsMXKzUI-qbTi2g6NgL-8FJueHIXdoiiNmw';
+const SHEET_TAB  = 'Sheet1';
+const SCOPES     = 'https://www.googleapis.com/auth/spreadsheets';
+const BASELINE   = 12;
+const ODO_START  = 304323;
+
+let tokenClient, accessToken = null, rows = [];
+
+// ── Boot ───────────────────────────────────────────────
+window.addEventListener('load', () => {
+  document.getElementById('f-date').value = today();
+  gapi.load('client', async () => {
+    await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
+  });
+  // GIS may load async — poll
+  const waitGIS = setInterval(() => {
+    if (typeof google !== 'undefined' && google.accounts) {
+      clearInterval(waitGIS);
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: onToken
+      });
+    }
+  }, 200);
+});
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+// ── Auth ───────────────────────────────────────────────
+function doSignIn() {
+  if (!tokenClient) { setTimeout(doSignIn, 300); return; }
+  tokenClient.requestAccessToken({ prompt: '' });
+}
+
+function onToken(resp) {
+  if (resp.error) { console.error(resp); return; }
+  accessToken = resp.access_token;
+  gapi.client.setToken({ access_token: accessToken });
+  onSignedIn();
+}
+
+function onSignedIn() {
+  document.getElementById('auth-zone').innerHTML =
+    '<div class="auth-ok"><span class="auth-dot"></span>Connected</div>';
+  document.getElementById('signin-prompt').style.display = 'none';
+  document.getElementById('log-form').style.display = 'block';
+  ensureHeaders().then(loadData);
+}
+
+// ── Sheets helpers ─────────────────────────────────────
+async function sheetGet(range) {
+  const r = await gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID, range: `${SHEET_TAB}!${range}`
+  });
+  return r.result.values || [];
+}
+
+async function sheetAppend(values) {
+  await gapi.client.sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: `${SHEET_TAB}!A1`,
+    valueInputOption: 'USER_ENTERED',
+    resource: { values }
+  });
+}
+
+async function ensureHeaders() {
+  const h = await sheetGet('A1:F1');
+  if (!h.length || h[0][0] !== 'Date') {
+    await sheetAppend([['Date','Odometer_km','Litres','Amount_RM','KM_Driven','Notes']]);
+  }
+}
+
+async function loadData() {
+  const raw = await sheetGet('A2:F2000');
+  rows = raw
+    .map(r => ({
+      date:   r[0] || '',
+      odo:    r[1] ? parseFloat(r[1]) : null,
+      litres: parseFloat(r[2]) || 0,
+      amount: parseFloat(r[3]) || 0,
+      km:     r[4] ? parseFloat(r[4]) : null,
+      notes:  r[5] || ''
+    }))
+    .filter(r => r.date && r.litres > 0)
+    .sort((a,b) => a.date.localeCompare(b.date));
+  updateOdoHint();
+  renderAll();
+}
+
+function updateOdoHint() {
+  const last = [...rows].reverse().find(r => r.odo);
+  const hint = document.getElementById('odo-hint');
+  if (last) hint.textContent = `Last ODO: ${last.odo.toLocaleString()} km (${last.date})`;
+  else hint.textContent = `Starting ODO: 304,323 km (7 Jun 2025)`;
+}
+
+// ── Save ───────────────────────────────────────────────
+async function saveEntry() {
+  const date   = document.getElementById('f-date').value;
+  const odo    = parseFloat(document.getElementById('f-odo').value) || null;
+  const litres = parseFloat(document.getElementById('f-litres').value);
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const notes  = document.getElementById('f-notes').value.trim();
+
+  if (!date || !litres || !amount) { msg('Fill in Date, Litres and Amount.','err'); return; }
+  if (litres > 100) { msg('Litres seems too high — double-check.','err'); return; }
+
+  // Auto-calc km from odo diff
+  let kmDriven = null;
+  if (odo) {
+    const prevOdo = [...rows].reverse().find(r => r.odo);
+    const base = prevOdo ? prevOdo.odo : ODO_START;
+    kmDriven = odo - base;
+    if (kmDriven <= 0 || kmDriven > 2000) kmDriven = null; // sanity
+  }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await sheetAppend([[date, odo||'', litres, amount, kmDriven||'', notes]]);
+    msg(`✓ Saved! ${kmDriven ? kmDriven+' km driven auto-calculated.' : 'No odometer — km/L not calculated.'}`, 'ok');
+    ['f-odo','f-litres','f-amount','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-date').value = today();
+    await loadData();
+  } catch(e) { msg('Save failed — try signing in again.','err'); console.error(e); }
+  btn.disabled = false; btn.textContent = '+ Save Entry';
+}
+
+function msg(t, cls) {
+  const el = document.getElementById('fmsg');
+  el.textContent = t; el.className = 'fmsg ' + cls;
+  if (cls === 'ok') setTimeout(() => el.textContent = '', 4000);
+}
+
+// ── Stats ──────────────────────────────────────────────
+function calc(arr) {
+  const rm  = arr.reduce((s,r) => s+r.amount, 0);
+  const l   = arr.reduce((s,r) => s+r.litres, 0);
+  const km  = arr.reduce((s,r) => s+(r.km||0), 0);
+  const eff = (km>0 && l>0) ? km/l : null;
+  return { rm, l, km, eff, ppl: l>0 ? rm/l : null, n: arr.length };
+}
+
+function fc(n,d=2) { return (n==null||isNaN(n)) ? '—' : n.toFixed(d); }
+function fRM(n)  { return 'RM '+fc(n,2); }
+function effCls(e) { if(!e) return 'cm'; return e>=BASELINE?'cg':e>=9?'cw':'cb'; }
+
+function statsBlock(s) {
+  const pct = s.eff ? Math.min(100,(s.eff/(BASELINE*1.4))*100) : 0;
+  const tag = s.eff ? (s.eff>=BASELINE ? `✅ +${fc(s.eff-BASELINE,1)} above baseline` : `⚠️ ${fc(BASELINE-s.eff,1)} km/L below baseline`) : '';
+  return `
+  <div class="sg">
+    <div class="sbox"><div class="sv ca">${fRM(s.rm)}</div><div class="sl">Spent</div></div>
+    <div class="sbox"><div class="sv ca">${fc(s.l,1)} L</div><div class="sl">Litres</div></div>
+    <div class="sbox"><div class="sv">${s.km>0 ? Math.round(s.km)+' km' : '—'}</div><div class="sl">KM Driven</div></div>
+    <div class="sbox"><div class="sv ${effCls(s.eff)}">${s.eff ? fc(s.eff,1)+' km/L' : '—'}</div><div class="sl">Efficiency</div></div>
+  </div>
+  ${s.eff ? `<div class="ebar-wrap">
+    <div class="ebar-top"><span>${tag}</span><span>${fc(s.eff,1)} / ${BASELINE} km/L target</span></div>
+    <div class="ebar"><div class="ebar-fill" style="width:${pct}%"></div></div>
+  </div>` : ''}
+  <div style="font-size:10px;color:var(--muted);margin-top:9px;">${s.ppl?'RM '+fc(s.ppl,3)+'/L · ':''} ${s.n} fill-up${s.n!==1?'s':''}</div>`;
+}
+
+function entryList(arr) {
+  if (!arr.length) return '<div class="empty">No entries in this period.</div>';
+  return [...arr].reverse().map(r => {
+    const e = (r.km && r.litres) ? r.km/r.litres : null;
+    return `<div class="entry">
+      <div>
+        <div class="entry-main">${fRM(r.amount)} · ${fc(r.litres,2)} L</div>
+        <div class="entry-sub">${r.date}${r.odo?' · ODO '+r.odo.toLocaleString():''}${r.km?' · '+Math.round(r.km)+' km':''}${r.notes?' · '+r.notes:''}</div>
+      </div>
+      ${e ? `<span class="badge badge-blue">${fc(e,1)} km/L</span>` : '<span class="badge badge-dim">no odo</span>'}
+    </div>`;
+  }).join('');
+}
+
+// ── Render ─────────────────────────────────────────────
+function renderAll() {
+  renderAllTime();
+  renderWeek();
+  renderMonth();
+  renderHistory();
+}
+
+function renderAllTime() {
+  const s = calc(rows);
+  document.getElementById('alltime-body').innerHTML = rows.length
+    ? statsBlock(s)
+    : '<div class="empty">No entries yet. Log your first fill-up above.</div>';
+}
+
+function getWeekBounds() {
+  const d = new Date();
+  const day = d.getDay() || 7; // Mon=1…Sun=7
+  const mon = new Date(d); mon.setDate(d.getDate() - day + 1);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = x => x.toISOString().slice(0,10);
+  return [fmt(mon), fmt(sun)];
+}
+
+function renderWeek() {
+  const [ws, we] = getWeekBounds();
+  const wr = rows.filter(r => r.date >= ws && r.date <= we);
+  const s  = calc(wr);
+  const label = (() => {
+    const a = new Date(ws), b = new Date(we);
+    const mo = x => x.toLocaleString('en-MY',{day:'numeric',month:'short'});
+    return `${mo(a)} – ${mo(b)} ${b.getFullYear()}`;
+  })();
+  document.getElementById('week-body').innerHTML = `
+    <div class="phero">
+      <div class="phero-title">📅 This Week · ${label}</div>
+      ${wr.length ? statsBlock(s) : '<div class="empty" style="padding:6px 0">No entries this week.</div>'}
+    </div>
+    <div class="card"><div class="card-lbl">Entries</div>${entryList(wr)}</div>`;
+}
+
+function renderMonth() {
+  const now  = new Date();
+  const ms   = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+  const me   = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-31';
+  const mr   = rows.filter(r => r.date >= ms && r.date <= me);
+  const s    = calc(mr);
+  const label = now.toLocaleString('en-MY',{month:'long',year:'numeric'});
+  document.getElementById('month-body').innerHTML = `
+    <div class="phero">
+      <div class="phero-title">📅 ${label}</div>
+      ${mr.length ? statsBlock(s) : '<div class="empty" style="padding:6px 0">No entries this month.</div>'}
+    </div>
+    <div class="card"><div class="card-lbl">Entries</div>${entryList(mr)}</div>`;
+}
+
+function renderHistory() {
+  document.getElementById('history-body').innerHTML = rows.length
+    ? entryList(rows)
+    : '<div class="empty">No entries yet.</div>';
+}
+
+// ── Tab switch ─────────────────────────────────────────
+function sw(name) {
+  ['log','week','month','history'].forEach((t,i) => {
+    document.getElementById('pane-'+t).classList.toggle('active', t===name);
+    document.querySelectorAll('.tab')[i].classList.toggle('active', t===name);
+  });
+}
+</script>
+</body>
+</html>

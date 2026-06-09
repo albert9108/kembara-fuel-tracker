@@ -117,7 +117,7 @@ input[type=date] { color-scheme: dark; }
     <div class="hdr-logo">⛽</div>
     <div>
       <div class="hdr-title">Kembara Fuel Log</div>
-      <div class="hdr-sub">Baseline 12 km/L · ODO start 304,323 km · 7 Jun 2025</div>
+      <div class="hdr-sub">Target 13 km/L · ODO start 304,323 km · 7 Jun 2025</div>
     </div>
   </div>
   <div id="auth-zone">
@@ -151,6 +151,7 @@ input[type=date] { color-scheme: dark; }
     <div class="tip">
       <b>Recording your odometer is the key</b> — every time you pump, note the reading.<br>
       KM driven is auto-calculated from your previous entry.<br>
+      <b>Tip:</b> For accurate per-fill km/L, always fill to the brim. Mixing half and full tanks skews individual readings — but overall totals stay correct.<br>
       <div class="odo-calc" id="odo-hint">Last known ODO: 304,323 km (start)</div>
     </div>
     <div class="card">
@@ -216,7 +217,7 @@ const CLIENT_ID  = '463350410605-j2u4hv1h5jsasdc0kdec6kqggs0f8d4j.apps.googleuse
 const SHEET_ID   = '1LXpFBoPsFsMXKzUI-qbTi2g6NgL-8FJueHIXdoiiNmw';
 const SHEET_TAB  = 'Sheet1';
 const SCOPES     = 'https://www.googleapis.com/auth/spreadsheets';
-const BASELINE   = 12;
+const BASELINE   = 13;
 const ODO_START  = 304323;
 
 let tokenClient, accessToken = null, rows = [];
@@ -360,7 +361,7 @@ function calc(arr) {
 
 function fc(n,d=2) { return (n==null||isNaN(n)) ? '—' : n.toFixed(d); }
 function fRM(n)  { return 'RM '+fc(n,2); }
-function effCls(e) { if(!e) return 'cm'; return e>=BASELINE?'cg':e>=9?'cw':'cb'; }
+function effCls(e) { if(!e) return 'cm'; return e>=BASELINE?'cg':e>=10?'cw':'cb'; }
 
 function statsBlock(s) {
   const pct = s.eff ? Math.min(100,(s.eff/(BASELINE*1.4))*100) : 0;

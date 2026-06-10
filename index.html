@@ -51,14 +51,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 /* FORM */
 .fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
-.field { display: flex; flex-direction: column; gap: 4px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .field label { font-size: 11px; color: var(--muted); font-weight: 500; }
 .field input, .field select {
   background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
-  color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; width: 100%;
+  color: var(--text); padding: 8px 10px; font-size: 13px; outline: none; width: 100%; min-width: 0; overflow: hidden;
 }
 .field input:focus { border-color: var(--accent); }
 input[type=date] { color-scheme: dark; }
+@media (max-width: 400px) { .fg2 { grid-template-columns: 1fr; } }
 
 .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 4px; }
 .btn-save:hover { filter: brightness(1.1); }
@@ -149,8 +150,9 @@ input[type=date] { color-scheme: dark; }
 
   <div id="log-form" style="display:none;">
     <div class="tip">
-      <b>Record your odometer every fill-up</b> — km driven is auto-calculated.<br>
-      For accurate km/L, always fill to the brim.
+      <b>Recording your odometer is the key</b> — every time you pump, note the reading.<br>
+      KM driven is auto-calculated from your previous entry.<br>
+      <b>Tip:</b> For accurate per-fill km/L, always fill to the brim. Mixing half and full tanks skews individual readings — but overall totals stay correct.
       <div class="odo-calc" id="odo-hint">Last known ODO: 304,323 km (start)</div>
     </div>
     <div class="card">

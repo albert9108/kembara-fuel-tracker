@@ -152,7 +152,7 @@ input[type=date] { color-scheme: dark; }
     <div class="tip">
       <b>Recording your odometer is the key</b> — every time you pump, note the reading.<br>
       KM driven is auto-calculated from your previous entry.<br>
-      <b>Tip:</b> For accurate per-fill km/L, always fill to the brim. Mixing half and full tanks skews individual readings — but overall totals stay correct.
+      <b>Tip:</b> Always fill to the brim for accurate km/L. Kembara tank = 46L. Partial fills will show estimated km/L.
       <div class="odo-calc" id="odo-hint">Last known ODO: 304,323 km (start)</div>
     </div>
     <div class="card">
@@ -176,11 +176,10 @@ input[type=date] { color-scheme: dark; }
         </div>
       </div>
       <div class="field" style="margin-bottom:10px;">
-        <label>Fill Type</label>
+        <label>Fill Type <span style="color:var(--muted);font-weight:400;">(affects km/L accuracy)</span></label>
         <select id="f-filltype">
-          <option value="Half→Full">Half → Full tank</option>
-          <option value="Full">Full tank (brim to brim)</option>
-          <option value="Other">Other / partial</option>
+          <option value="Full">Full tank — accurate km/L ✅</option>
+          <option value="Partial">Partial fill — km/L estimated ⚠️</option>
         </select>
       </div>
       <label class="madani-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 10px;">
@@ -362,7 +361,7 @@ async function saveEntry() {
     await sheetAppend([[date, odo||'', litres, amount, kmDriven||'', notes, filltype]]);
     msg(`✓ Saved! ${kmDriven ? kmDriven+' km driven auto-calculated.' : 'No odometer — km/L not calculated.'}`, 'ok');
     ['f-odo','f-litres','f-amount','f-notes'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('f-filltype').value = 'Half→Full';
+    document.getElementById('f-filltype').value = 'Full';
     document.getElementById('f-madani').checked = false;
     document.getElementById('madani-calc').textContent = '';
     document.getElementById('f-date').value = today();
@@ -447,7 +446,7 @@ function statsBlock(s) {
   <div style="font-size:10px;color:var(--muted);margin-top:9px;">${s.ppl?'RM '+fc(s.ppl,3)+'/L · ':''} ${s.n} fill-up${s.n!==1?'s':''}</div>`;
 }
 
-const FILL_LABEL = { 'Full': '🔵 Full', 'Half→Full': '🟡 ½→Full', 'Other': '⚪ Other' };
+const FILL_LABEL = { 'Full': '🔵 Full', 'Partial': '🟡 Partial', 'Half→Full': '🟡 ½→Full', 'Other': '⚪ Other' };
 
 function entryList(arr) {
   if (!arr.length) return '<div class="empty">No entries in this period.</div>';

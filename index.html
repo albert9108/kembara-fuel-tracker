@@ -178,8 +178,9 @@ input[type=date] { color-scheme: dark; }
       <div class="field" style="margin-bottom:10px;">
         <label>Fill Type <span style="color:var(--muted);font-weight:400;">(affects km/L accuracy)</span></label>
         <select id="f-filltype">
-          <option value="Full">Full tank — accurate km/L ✅</option>
-          <option value="Partial">Partial fill — km/L estimated ⚠️</option>
+          <option value="Full">Full tank (brim to brim) ✅</option>
+          <option value="Half→Full">Half → Full tank 🟡</option>
+          <option value="Partial">Partial top-up ⚠️</option>
         </select>
       </div>
       <label class="madani-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 10px;">

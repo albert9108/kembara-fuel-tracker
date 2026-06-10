@@ -149,9 +149,8 @@ input[type=date] { color-scheme: dark; }
 
   <div id="log-form" style="display:none;">
     <div class="tip">
-      <b>Recording your odometer is the key</b> — every time you pump, note the reading.<br>
-      KM driven is auto-calculated from your previous entry.<br>
-      <b>Tip:</b> For accurate per-fill km/L, always fill to the brim. Mixing half and full tanks skews individual readings — but overall totals stay correct.<br>
+      <b>Record your odometer every fill-up</b> — km driven is auto-calculated.<br>
+      For accurate km/L, always fill to the brim.
       <div class="odo-calc" id="odo-hint">Last known ODO: 304,323 km (start)</div>
     </div>
     <div class="card">
@@ -174,11 +173,12 @@ input[type=date] { color-scheme: dark; }
           <input type="number" id="f-amount" placeholder="e.g. 65.40" step="0.01" oninput="onAmountInput()">
         </div>
       </div>
-      <label class="madani-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;">
-        <input type="checkbox" id="f-madani" onchange="onMadaniChange()" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;">
-        <span style="font-size:12px;color:var(--text);font-weight:600;">Madani Budi RON95</span>
-        <span style="font-size:11px;color:var(--accent);font-weight:700;">RM 1.99/L</span>
-        <span id="madani-calc" style="font-size:10px;color:var(--muted);margin-left:auto;"></span>
+      <label class="madani-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 10px;">
+        <input type="checkbox" id="f-madani" onchange="onMadaniChange()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:var(--text);font-weight:600;">Madani Budi RON95 <span style="color:var(--accent);">RM 1.99/L</span></div>
+          <div id="madani-calc" style="font-size:10px;color:var(--muted);margin-top:2px;"></div>
+        </div>
       </label>
       <div class="field" style="margin-bottom:10px;">
         <label>Notes (optional — station, fuel grade…)</label>
